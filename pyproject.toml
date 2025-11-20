@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vanikeys"
+version = "0.1.0"
+description = "Vanity cryptographic key generation with pattern matching"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "TIA", email = "tia@example.com"}
+]
+keywords = [
+    "cryptography",
+    "vanity-address",
+    "key-generation",
+    "did",
+    "blockchain",
+    "bitcoin",
+    "ethereum"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+]
+
+dependencies = [
+    "cryptography>=41.0.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
+    "pyyaml>=6.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.7.0",
+    "ruff>=0.0.285",
+    "mypy>=1.5.0",
+]
+ethereum = [
+    "eth-keys>=0.4.0",
+    "eth-utils>=2.2.0",
+]
+did = [
+    "multiformats>=0.2.0",
+    "base58>=2.1.0",
+]
+
+[project.scripts]
+vanikeys = "vanikeys.cli.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/scottsen/vanikeys"
+Documentation = "https://github.com/scottsen/vanikeys/docs"
+Repository = "https://github.com/scottsen/vanikeys"
+Issues = "https://github.com/scottsen/vanikeys/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (black handles this)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--cov=vanikeys --cov-report=html --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
