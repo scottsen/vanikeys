@@ -1,0 +1,66 @@
+[project]
+name = "vanikeys"
+version = "0.1.0"
+description = "VaniKeys - Gamified vanity key generation service with slot machine mechanics"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Scott Senger", email = "scottsen@tia.net"}
+]
+dependencies = [
+    "fasthtml>=0.2.0",
+    "redis>=5.0.0",
+    "psycopg2-binary>=2.9.0",
+    "stripe>=7.0.0",
+    "structlog>=23.0.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "reveal-cli>=0.13.0",
+]
+
+gpu = [
+    "cupy>=12.0.0",  # GPU acceleration
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 88
+extend-select = ["I"]  # import sorting
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # pycodestyle, pyflakes, isort
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Start lenient, tighten later
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "src/vanikeys/config/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
