@@ -1,0 +1,48 @@
+# VaniKeys RunPod Serverless Dockerfile (Lightweight)
+#
+# This is a SLIM version using python:3.10-slim base (~150MB vs 13GB RunPod image)
+#
+# Tradeoffs:
+# - ✅ Pushes to private registry (under size limits)
+# - ✅ Fast builds (2 min vs 10 min)
+# - ✅ All VaniKeys functionality works
+# - ⚠️  No pre-installed GPU libraries (RunPod provides GPU access via runtime)
+# - ⚠️  CPU-only performance initially (10-20K keys/sec vs 50M on GPU)
+#
+# Note: For GPU acceleration, add cupy/pytorch later or use full RunPod base on Docker Hub
+
+FROM python:3.10-slim
+
+WORKDIR /workspace
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy VaniKeys source code
+COPY . /workspace/vanikeys
+
+# Install VaniKeys dependencies
+RUN cd /workspace/vanikeys && \
+    pip install --no-cache-dir -e .
+
+# Install RunPod SDK
+RUN pip install --no-cache-dir runpod
+
+# Copy handler
+COPY deployment/runpod_handler.py /workspace/
+
+# Verify installation
+RUN python -c "import vanikeys; from vanikeys.crypto import generate_master_seed; from vanikeys.matchers import MultiSubstringMatcher; print('✓ VaniKeys ready')"
+
+# RunPod expects the handler to be at the root
+CMD ["python", "-u", "/workspace/runpod_handler.py"]
+
+# Metadata
+LABEL org.opencontainers.image.title="VaniKeys RunPod Handler (Slim)"
+LABEL org.opencontainers.image.description="Serverless handler for VaniKeys vanity SSH key generation (lightweight)"
+LABEL org.opencontainers.image.version="0.2.0"
+LABEL org.opencontainers.image.authors="Scott Senger <scottsen@tia.net>"
+LABEL org.opencontainers.image.size="~150MB"

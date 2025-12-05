@@ -14,10 +14,10 @@
 set -euo pipefail
 
 # Configuration
-DOCKER_USERNAME="${1:-scottsen}"
+REGISTRY="${1:-registry.mytia.net}"
 VERSION_TAG="${2:-latest}"
 IMAGE_NAME="vanikeys-runpod"
-FULL_IMAGE_NAME="${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION_TAG}"
+FULL_IMAGE_NAME="${REGISTRY}/${IMAGE_NAME}:${VERSION_TAG}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -84,25 +84,35 @@ else
 fi
 echo ""
 
-# Step 4: Push to Docker registry
-echo -e "${YELLOW}Step 4: Pushing to Docker Hub...${NC}"
+# Step 4: Push to private registry
+echo -e "${YELLOW}Step 4: Pushing to private registry (registry.mytia.net)...${NC}"
 echo "Image: ${FULL_IMAGE_NAME}"
 echo ""
-echo "Ensure you're logged in: docker login"
-echo ""
 
-read -p "Push image to Docker Hub? (y/N) " -n 1 -r
+# Login to registry with credentials from TIA secrets
+REGISTRY_USER=$(tia secrets get registry:username 2>/dev/null || echo "tia-deploy")
+REGISTRY_PASS=$(tia secrets get registry:password 2>/dev/null)
+
+if [ -z "$REGISTRY_PASS" ]; then
+    echo -e "${RED}✗ Registry password not found in TIA secrets${NC}"
+    echo "  Set with: tia secrets set registry:password 'your-password'"
+    exit 1
+fi
+
+echo "$REGISTRY_PASS" | podman login registry.mytia.net -u "$REGISTRY_USER" --password-stdin
+
+read -p "Push image to registry.mytia.net? (y/N) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    if docker push "${FULL_IMAGE_NAME}"; then
-        echo -e "${GREEN}✓ Image pushed successfully${NC}"
+    if podman push "${FULL_IMAGE_NAME}"; then
+        echo -e "${GREEN}✓ Image pushed successfully to private registry${NC}"
     else
-        echo -e "${RED}✗ Docker push failed. Are you logged in? (docker login)${NC}"
+        echo -e "${RED}✗ Push failed. Check registry access.${NC}"
         exit 1
     fi
 else
     echo -e "${YELLOW}Skipping push. You can push later with:${NC}"
-    echo "  docker push ${FULL_IMAGE_NAME}"
+    echo "  podman push ${FULL_IMAGE_NAME}"
 fi
 echo ""
 
