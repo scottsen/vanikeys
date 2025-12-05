@@ -1,23 +1,31 @@
 [project]
 name = "vanikeys"
-version = "0.1.0"
-description = "VaniKeys - Gamified vanity key generation service with slot machine mechanics"
+version = "0.2.0"
+description = "VaniKeys - Zero-knowledge vanity SSH key generation. Your private keys never leave your machine."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
     {name = "Scott Senger", email = "scottsen@tia.net"}
 ]
 dependencies = [
-    "fasthtml>=0.2.0",
+    "click>=8.1.0",
+    "cryptography>=41.0.0",
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+vanikeys = "vanikeys.cli:main"
+
+[project.optional-dependencies]
+server = [
+    "fastapi>=0.104.0",
     "redis>=5.0.0",
     "psycopg2-binary>=2.9.0",
     "stripe>=7.0.0",
     "structlog>=23.0.0",
-    "pydantic>=2.0.0",
-    "httpx>=0.25.0",
+    "uvicorn>=0.24.0",
 ]
-
-[project.optional-dependencies]
 dev = [
     "pytest>=7.4.0",
     "pytest-cov>=4.1.0",
@@ -26,7 +34,6 @@ dev = [
     "mypy>=1.5.0",
     "reveal-cli>=0.13.0",
 ]
-
 gpu = [
     "cupy>=12.0.0",  # GPU acceleration
 ]
