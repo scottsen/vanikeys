@@ -18,8 +18,12 @@ from typing import Dict, Any
 # Add VaniKeys to path
 sys.path.insert(0, '/workspace/vanikeys/src')
 
-from vanikeys.crypto.derivation import seed_to_keypair_at_path
-from vanikeys.crypto.fingerprint import compute_ssh_fingerprint
+from vanikeys.crypto import (
+    generate_master_seed,
+    seed_to_root_keypair,
+    derive_child_keypair,
+    compute_ssh_fingerprint,
+)
 from vanikeys.matchers import MultiSubstringMatcher
 
 
@@ -100,10 +104,8 @@ def handler(job: Dict[str, Any]) -> Dict[str, Any]:
             # Note: seed_hash is a placeholder - in production this needs the actual
             # user master seed hash via the zero-knowledge protocol
             try:
-                priv_key, pub_key = seed_to_keypair_at_path(
-                    seed_hash.encode(),
-                    path
-                )
+                seed_bytes = seed_hash.encode().ljust(32, b'\x00')[:32]  # Ensure 32 bytes
+                priv_key, pub_key = derive_child_keypair(seed_bytes, path)
             except Exception as e:
                 return {
                     'status': 'error',
